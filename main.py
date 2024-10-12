@@ -14,7 +14,7 @@ from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 # API keys and Tokens
 GROQ_API_KEY = "Your Groq API key"
 GITHUB_TOKEN = "Your Github token"
-YOUTUBE_API_KEY = "Your Youtube API kry"
+YOUTUBE_API_KEY = "Your Youtube API key"
 
 # Initialize Groq Client
 client = Groq(api_key=GROQ_API_KEY)
