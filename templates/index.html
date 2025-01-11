@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classroom Dashboard with Sidebar Toggle</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #eef1f4; /* Light background color */
+      overflow-x: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      height: 100vh;
+      width: 80px; /* Collapsed width */
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #3c4a7a; /* Dark blue background */
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+      padding-top: 20px;
+      transition: width 0.3s ease;
+      z-index: 999; 
+    }
+
+    .sidebar.open {
+      width: 240px; 
+    }
+
+    .sidebar .menu-item {
+      display: flex;
+      align-items: first baseline ;
+      padding: 10px; /* Reduced padding for line spacing */
+      color: #ffffff; /* White text color */
+      font-size: 14px; /* Slightly larger font size */
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .menu-item .material-icons {
+      margin-right: 10px;
+      font-size: 30px; /* Updated icon size */
+    }
+
+    .menu-item .menu-text {
+      display: none; 
+      font-size: 20px;/* Initially hidden */
+    }
+
+    .sidebar.open .menu-item .menu-text {
+      display: inline-block; /* Show the text when sidebar is open */
+    }
+
+    .sidebar:not(.open) .menu-item .menu-text {
+      display: none; /* Hide the text when the sidebar is collapsed */
+    }
+
+    .sidebar .menu-item:hover {
+      background-color: #4c5d95; /* Lighter blue on hover */
+    }
+
+    .enrolled-list {
+      margin-left: 20px;
+      font-size: 18px; /* Increased font size */
+      line-height: 1.8; /* Increased line spacing */
+      color: #ffffff; /* White text color */
+      display: none; /* Initially hidden */
+    }
+
+    .enrolled-list span {
+      display: block;
+      padding: 10px 0; /* Increased spacing between items */
+      cursor: pointer;
+    }
+
+    .enrolled-list span:hover {
+      color: #f1c40f; /* Yellow color on hover */
+    }
+
+    /* Topbar */
+    .topbar {
+      height: 75px;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      justify-content: space-between;
+      position: relative;
+      z-index: 1000;
+    }
+
+    .topbar .menu-button {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .topbar .menu-button span {
+      font-size: 30px;
+      margin-right: 10px;
+      color: #3c4a7a; /* Dark blue */
+    }
+
+    .topbar .logo {
+        font-size: 30px;
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar .logo img {
+      height: 50px;
+      margin-right: 10px;
+    }
+
+    .topbar .right-options {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      color: #5f6368;
+    }
+
+    .right-options span {
+      margin-left: 20px;
+      cursor: pointer;
+    }
+
+    .right-options span:hover {
+      color: #1a73e8;
+    }
+
+    /* Subtitle Bar */
+    .subtitle-bar {
+      height: 50px;
+      background-color: #3c4a7a; /* Dark blue background */
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffffff; /* White text color */
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Card Grid */
+    .grid-container {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      margin-left: 80px; /* Initial margin for the collapsed sidebar */
+      transition: margin-left 0.3s ease;
+    }
+
+    .grid-container.collapsed {
+      margin-left: 20px; /* Margin when sidebar is closed */
+    }
+
+    .card {
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      width: calc(25% - 30px); /* Four cards per row when collapsed */
+      height: 420px; /* Increased height to accommodate image */
+      margin: 15px;
+      padding: 15px;
+      position: relative;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease; /* Smooth transform on hover */
+    }
+
+    .card.open {
+      width: calc(33.33% - 30px); /* Three cards per row when sidebar is open */
+    }
+
+    .card img {
+      width: 100%; /* Image takes full width */
+      height: 150px; /* Set a height for the image */
+      border-radius: 8px; /* Rounded corners for the image */
+      margin-bottom: 10px; /* Spacing below the image */
+    }
+
+    .card h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #3c4a7a; /* Dark blue for card titles */
+    }
+
+    .card p {
+      color: #5f6368;
+      font-size: 14px;
+      margin: 5px 0;
+    }
+
+    .card .icons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: auto; /* Push icons to the bottom */
+    }
+
+    .icons .material-icons {
+      font-size: 25px;
+      color: #5f6368;
+      cursor: pointer;
+      transition: color 0.3s; /* Smooth color change on hover */
+    }
+
+    .icons .material-icons:hover {
+      color: #1a73e8; /* Change color on hover */
+    }
+
+    /* Card hover effect */
+    .card:hover {
+      transform: translateY(-5px); /* Lift effect on hover */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+    }
+
+    /* Media Queries for Responsiveness */
+    @media (max-width: 768px) {
+      .grid-container {
+        margin-left: 20px;
+      }
+      .card {
+        width: calc(50% - 30px); /* Two cards per row */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        width: 100%; /* One card per row */
+      }
+    }
+    .right-options img  {
+        padding: 20px;
+        width: 80px;
+        border-radius: 100%;
+    }
+    .dropdown {
+    position: relative;
+    display: inline-block;
+    
+}
+
+#plus-icon {
+    font-size: 40px; /* Increase the icon size */
+    color: #3c4a7a; /* Dark blue color */
+    cursor: pointer;
+    transition: transform 0.3s; /* Smooth transform effect */
+}
+
+#plus-icon:hover {
+    transform: scale(1.1); /* Slightly enlarge on hover */
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    margin-top: 10px; /* Add margin for spacing */
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block; /* Show the dropdown on hover */
+}
+.chatbot {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+#chatbot-icon {
+    font-size: 50px;
+    color: #3c4a7a; /* Dark blue color */
+    cursor: pointer;
+    background-color: #ffffff; /* White background for icon */
+    border-radius: 50%;
+    padding: 15px; /* Padding for icon */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Shadow for icon */
+    transition: transform 0.3s;
+}
+
+#chatbot-icon:hover {
+    transform: scale(1.1); /* Slight zoom effect on hover */
+}
+
+.chat-window {
+    display: none; /* Hidden by default */
+    width: 300px; /* Set a fixed width for the chat window */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    position: absolute;
+    bottom: 60px; /* Positioned above the chatbot icon */
+    right: 0;
+}
+
+.chat-header {
+    background-color: #3c4a7a; /* Dark blue header */
+    color: #fff;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-content {
+    max-height: 200px; /* Set max height for the chat content */
+    overflow-y: auto; /* Enable scrolling */
+    padding: 10px;
+}
+
+.message {
+    margin: 5px 0;
+    color: #333; /* Message color */
+}
+
+.chat-input {
+    width: 100%;
+    border: none;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+}
+
+.enlarge-button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 18px;
+}
+.right-options span {
+    font-size: 18px; /* Increase font size */
+    color: #3c4a7a; /* Optional: Change text color to match the theme */
+    margin-left: 5px; /* Optional: Add some space between the profile image and the text */
+    font-weight: bold; /* Optional: Make the text bold */
+}
+.logo-text {
+    font-size: px; /* Adjust the font size as needed */
+    font-weight: bold; /* Make the text bold */
+    color: #3c4a7a; /* Change the text color */
+    font-family: 'Arial', sans-serif; /* Specify a font family */
+    margin-left: 10px; /* Optional: Adjust space between logo image and text */
+}
+
+ </style>
+</head>
+<body>
+    <!-- Floating Chatbot -->
+<div class="chatbot">
+  <a href="{{url_for('chatbot')}}">chat</a>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-content">
+            <div class="message">Hello! How can I help you today?</div>
+        </div>
+        <input type="text" class="chat-input" placeholder="Type a message...">
+    </div>
+</div>
+
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="menu-item" onclick="toggleSidebar()">
+      <span class="material-icons">menu</span>
+    </div>
+    <div class="menu-item">
+      <span class="material-icons">home</span>
+      <span class="menu-text">Home</span>
+    </div>
+    <div class="menu-item" id="enrolled-menu" onclick="toggleEnrolled()" style="pointer-events: none;">
+      <span class="material-icons">school</span>
+      <span class="menu-text">Enrolled</span>
+    </div>
+    <div class="enrolled-list" id="enrolled-list">
+      <span>Cyber Security and Tech</span>
+      <span>Information Technology</span>
+      <span>Mechanical Basics</span>
+      <span>Data Structures</span>
+      <span>Symmetrical Engineering</span>
+      <span>Artificial Intellingence</span>
+    </div>
+    <div class="menu-item">
+      <span class="material-icons">archive</span>
+      <span class="menu-text">Archived classes</span>
+    </div>
+    <div class="menu-item">
+      <span class="material-icons">settings</span>
+      <span class="menu-text">Settings</span>
+    </div>
+    <div class="menu-item">
+        <span class="material-icons">logout</span>
+        <span class="menu-text">Logout</span>
+      </div>
+  </div>
+
+<!-- Topbar -->
+<div class="topbar">
+    <div class="menu-button" onclick="toggleSidebar()">
+        <span class="material-icons">menu</span>
+    </div>
+    <div class="logo">
+        <img src="https://thelearninghub.pk/wp/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-12-at-5@3x-1.png" alt="Logo">
+        <span class="logo-text">Learning Hub</span>
+    </div>
+    <div class="right-options">
+        <!-- Plus Icon with Dropdown -->
+        <div class="dropdown">
+            <span class="material-icons" id="plus-icon" onclick="toggleDropdown(event)">add_circle</span>
+            <div class="dropdown-content" id="dropdown-menu">
+                <a href="#">Create Class</a>
+                <a href="#">Join Class</a>
+            </div>
+        </div>
+        
+        <img src="C:\Users\mdyas\Downloads\profile.png" alt="Profile" class="profile-photo">
+        <span>Mohamed Yasir</span>
+    
+    </div>
+</div>
+
+
+  <!-- Main Content -->
+  <div id="main-content" style="margin-left: 80px; transition: margin-left 0.3s ease;">
+    <div class="subtitle-bar">Courses</div>
+    <div class="grid-container" id="grid-container">
+      <div class="card">
+        <img src="C:\Users\mdyas\Downloads\images.jpeg" alt="Course Image">
+        <div class="avatar"></div>
+        <h3>Cyber Security and Tech</h3>
+        <p>I YEAR 'A'</p>
+        <p>SHARMA A</p>
+        <div class="icons">
+          <span class="material-icons">camera_alt</span>
+          <span class="material-icons">folder</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="C:\Users\mdyas\Downloads\images.jpeg" alt="Course Image">
+        <div class="avatar"></div>
+        <h3>Information Technology</h3>
+        <p>I YEAR 'A'</p>
+        <p>ANJALI K</p>
+        <div class="icons">
+          <span class="material-icons">camera_alt</span>
+          <span class="material-icons">folder</span>
+        </div>
+      </div>
+
+      <!-- Added Cards -->
+      <div class="card">
+        <img src="C:\Users\mdyas\Downloads\images.jpeg" alt="Course Image">
+        <div class="avatar"></div>
+        <h3>Mechanical Basics</h3>
+        <p>II YEAR 'C'</p>
+        <p>KARTHIK P</p>
+        <div class="icons">
+          <span class="material-icons">camera_alt</span>
+          <span class="material-icons">folder</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="C:\Users\mdyas\Downloads\images.jpeg" alt="Course Image">
+        <div class="avatar"></div>
+        <h3>Data Structures</h3>
+        <p>III YEAR 'D'</p>
+        <p>RAMESH S</p>
+        <div class="icons">
+          <span class="material-icons">camera_alt</span>
+          <span class="material-icons">folder</span>
+        </div>
+      </div>
+
+      <!-- Additional Card -->
+      <div class="card">
+        <img src="C:\Users\mdyas\Downloads\images.jpeg"alt="Course Image">
+        <div class="avatar"></div>
+        <h3>Symmetrical Engineering</h3>
+        <p>II YEAR 'C'</p>
+        <p>KARTHIK P</p>
+        <div class="icons">
+          <span class="material-icons">camera_alt</span>
+          <span class="material-icons">folder</span>
+        </div>
+      </div>
+
+      <!-- Another Additional Card -->
+      <div class="card">
+        <img src="C:\Users\mdyas\Downloads\images.jpeg" alt="Course Image">
+        <div class="avatar"></div>
+        <h3>Artificial Intellingence</h3>
+        <p>III YEAR 'D'</p>
+        <p>NIKHIL M</p>
+        <div class="icons">
+          <span class="material-icons">camera_alt</span>
+          <span class="material-icons">folder</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleChat() {
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.style.display = chatWindow.style.display === 'block' ? 'none' : 'block';
+}
+
+function redirectToChat() {
+    window.location.href = 'full_chat_page.html'; // Replace with your full chat page URL
+}
+
+    function toggleDropdown(event) {
+    event.stopPropagation(); // Prevent event bubbling
+    const dropdown = document.getElementById('dropdown-menu');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+// Close the dropdown if clicking outside of it
+window.onclick = function(event) {
+    const dropdown = document.getElementById('dropdown-menu');
+    if (!event.target.matches('#plus-icon')) {
+        dropdown.style.display = 'none';
+    }
+}
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const gridContainer = document.getElementById('grid-container');
+      const enrolledMenu = document.getElementById('enrolled-menu');
+      const mainContent = document.getElementById('main-content');
+
+      sidebar.classList.toggle('open');
+      mainContent.style.marginLeft = sidebar.classList.contains('open') ? '240px' : '80px';
+      gridContainer.classList.toggle('collapsed', !sidebar.classList.contains('open')); // Toggle classes for the grid
+      enrolledMenu.style.pointerEvents = sidebar.classList.contains('open') ? 'auto' : 'none'; // Enable/disable enrolled dropdown
+      document.getElementById('enrolled-list').style.display = 'none'; // Close enrolled list when sidebar closes
+    }
+
+    function toggleEnrolled() {
+      const enrolledList = document.getElementById('enrolled-list');
+      if (document.getElementById('sidebar').classList.contains('open')) {
+        enrolledList.style.display = enrolledList.style.display === 'none' || !enrolledList.style.display ? 'block' : 'none';
+      }
+    }
+  </script>
+</body>
+</html>
