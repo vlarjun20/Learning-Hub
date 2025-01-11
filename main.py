@@ -12,9 +12,9 @@ from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 
 # API keys and Tokens
-GROQ_API_KEY = "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"
-GITHUB_TOKEN = "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"
-YOUTUBE_API_KEY = "AIzaSyCsDPZGaNlmvP9vzNTdJ8w6x2_D8pgFirA"
+GROQ_API_KEY = "Groq API"
+GITHUB_TOKEN = "Github token"
+YOUTUBE_API_KEY = "Youtube API key"
 
 # Initialize Groq Client
 client = Groq(api_key=GROQ_API_KEY)
